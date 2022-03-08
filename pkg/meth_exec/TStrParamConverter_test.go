@@ -1,6 +1,7 @@
-package meth_exec
+package meth_exec_test
 
 import (
+	"meth_by_http/pkg/meth_exec"
 	"reflect"
 	"testing"
 	"time"
@@ -10,7 +11,7 @@ import (
 
 /**Проверка преобразования внутрь**/
 func Test_TStrParamConverter_ConvertIn(t *testing.T) {
-	pConv := NewStrParamConverter()
+	pConv := meth_exec.NewStrParamConverter()
 	// Число
 	pRes, fOk, sError := pConv.ConvertIn("123", reflect.TypeOf((*int)(nil)).Elem())
 	require.Truef(t, fOk, "Ошибка пребразования в число %s", sError)
@@ -45,7 +46,7 @@ func Test_TStrParamConverter_ConvertIn(t *testing.T) {
 /**Проверка преобразования наружу**/
 
 func Test_TStrParamConverter_ConvertOut(t *testing.T) {
-	pConv := NewStrParamConverter()
+	pConv := meth_exec.NewStrParamConverter()
 	pStrType := reflect.TypeOf("")
 
 	// Число

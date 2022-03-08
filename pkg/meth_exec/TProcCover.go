@@ -25,19 +25,19 @@ func NewProcCoverSmp(_pProc interface{}) *TProcCover {
 	return NewProcCover(_pProc, NewStrParamConverter())
 }
 
-func (pSrv *TProcCover) Init() (_fOk bool, _sError string) {
+func (pCover *TProcCover) Init() (_fOk bool, _sError string) {
 	_sError = ""
 	_fOk = true
 	// 0) Определяем тип обработчика
-	pProcVal := reflect.ValueOf(pSrv.pProcHander)
-	pProcType := reflect.TypeOf(pSrv.pProcHander)
+	pProcVal := reflect.ValueOf(pCover.pProcHander)
+	pProcType := reflect.TypeOf(pCover.pProcHander)
 
 	if pProcType.Kind() != reflect.Ptr {
 		return false, "Тип должен быть по ссылке"
 	}
 	// 1)  Определяем список методов
-	pSrv.arMethods = make([]TMethInfo, pProcType.NumMethod())
-	for i := 0; i < len(pSrv.arMethods); i++ {
+	pCover.arMethods = make([]TMethInfo, pProcType.NumMethod())
+	for i := 0; i < len(pCover.arMethods); i++ {
 		pMethElem := pProcType.Method(i)
 		pMethValue := pProcVal.Method(i)
 		pMessInfo := TMethInfo{pMeth: pMethValue, sName: pMethElem.Name}
@@ -53,7 +53,7 @@ func (pSrv *TProcCover) Init() (_fOk bool, _sError string) {
 		case len(pMessInfo.arInput) == 1:
 			pMessInfo.arOutput = StructToParamInfo(pMethElem.Type.Out(0))
 		}
-		pSrv.arMethods[i] = pMessInfo
+		pCover.arMethods[i] = pMessInfo
 	}
 	return true, ""
 }
@@ -63,7 +63,7 @@ func (pSrv *TProcCover) Init() (_fOk bool, _sError string) {
    in имя метода,  струкура с входящими параметрами
    out выходные параметры, флаг успеха, строка  с ошибкой
 **/
-func (pSrv *TProcCover) exec(_pInfo TMethInfo, _pParams interface{}) (_pOutParam interface{}, _fOk bool, _sError string) {
+func (pCover *TProcCover) exec(_pInfo TMethInfo, _pParams interface{}) (_pOutParam interface{}, _fOk bool, _sError string) {
 
 	// Обработка паники внутри метода - чтобы сервер не упал из-за ошибки внутри обработки
 	defer func() {
@@ -96,12 +96,12 @@ func (pSrv *TProcCover) exec(_pInfo TMethInfo, _pParams interface{}) (_pOutParam
    in имя метода,  струкура с входящими параметрами
    out выходные параметры, флаг успеха, строка  с ошибкой
 **/
-func (pSrv *TProcCover) Exec(_sMethName string, _pParams interface{}) (_pOutParam interface{}, _fOk bool, _sError string) {
+func (pCover *TProcCover) Exec(_sMethName string, _pParams interface{}) (_pOutParam interface{}, _fOk bool, _sError string) {
 	// Ищем нужный метод и запускаем
-	for _, pMethInfo := range pSrv.arMethods {
+	for _, pMethInfo := range pCover.arMethods {
 		// Case sensitive или ограничиваем в Init
 		if pMethInfo.sName == _sMethName {
-			return pSrv.exec(pMethInfo, _pParams)
+			return pCover.exec(pMethInfo, _pParams)
 		}
 	}
 	return nil, false, fmt.Sprintf("Нет такого метода, %s", _sMethName)
@@ -112,9 +112,9 @@ func (pSrv *TProcCover) Exec(_sMethName string, _pParams interface{}) (_pOutPara
    in имя метода,  струкура с входящими параметрами
    out выходные параметры, флаг успеха, строка  с ошибкой
 **/
-func (pSrv *TProcCover) ExecOut(_sMethName string, _pParams map[string]interface{}) (_pOutParam map[string]interface{}, _fOk bool, _sError string) {
+func (pCover *TProcCover) ExecOut(_sMethName string, _pParams map[string]interface{}) (_pOutParam map[string]interface{}, _fOk bool, _sError string) {
 	// Ищем нужный метод и запускаем
-	for _, pMethInfo := range pSrv.arMethods {
+	for _, pMethInfo := range pCover.arMethods {
 		// Case sensitive или ограничиваем в Init
 
 		if pMethInfo.sName == _sMethName {
@@ -126,7 +126,7 @@ func (pSrv *TProcCover) ExecOut(_sMethName string, _pParams map[string]interface
 				if !found {
 					pParams[pParamInfo.Name] = reflect.Zero(pParamInfo.Type).Interface()
 				} else {
-					pRes, fOk, sErr := pSrv.pParamsConverter.ConvertIn(pVal, pParamInfo.Type)
+					pRes, fOk, sErr := pCover.pParamsConverter.ConvertIn(pVal, pParamInfo.Type)
 					if !fOk {
 						return nil, fOk, fmt.Sprintf("Ошибка при формировании параметра %s метода %s - %s", pParamInfo.Name, _sMethName, sErr)
 					}
@@ -137,7 +137,7 @@ func (pSrv *TProcCover) ExecOut(_sMethName string, _pParams map[string]interface
 			if !fOk {
 				return nil, fOk, sError
 			}
-			pOut, fOk, sError := pSrv.exec(pMethInfo, pParamsVal)
+			pOut, fOk, sError := pCover.exec(pMethInfo, pParamsVal)
 			if !fOk {
 				return nil, fOk, sError
 			}

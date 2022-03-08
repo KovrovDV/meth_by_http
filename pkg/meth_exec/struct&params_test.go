@@ -1,11 +1,12 @@
-package meth_exec
+package meth_exec_test
 
 import (
 	"reflect"
 	"testing"
 	"time"
 
-	//	"github.com/stretchr/testify"
+	"meth_by_http/pkg/meth_exec"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +19,7 @@ type TestReq struct {
 /**Проверка преобразования структуры в список параметров**/
 func TestStructToParamInfo(t *testing.T) {
 
-	pInfos := StructToParamInfo(reflect.TypeOf((*TestReq)(nil)).Elem())
+	pInfos := meth_exec.StructToParamInfo(reflect.TypeOf((*TestReq)(nil)).Elem())
 	require.Truef(t, len(pInfos) == 3, "Кол-во параметров должно быть 3 а оно %d", len(pInfos))
 	require.Truef(t, pInfos[0].Name == "Index", "Неправильное имя параметра %s, а должно быть Index", pInfos[0].Name)
 	require.Truef(t, pInfos[1].Type == reflect.TypeOf(""),
@@ -27,7 +28,7 @@ func TestStructToParamInfo(t *testing.T) {
 
 /**Проверка преобразования структуры в список параметров**/
 func TestParamsToStruct(t *testing.T) {
-	arParams := []TParamInfo{
+	arParams := []meth_exec.TParamInfo{
 		{Name: "Index", Type: reflect.TypeOf((*int)(nil)).Elem()},
 		{Name: "Name", Type: reflect.TypeOf("")},
 		{Name: "Data", Type: reflect.TypeOf((*time.Time)(nil)).Elem()},
@@ -38,7 +39,7 @@ func TestParamsToStruct(t *testing.T) {
 		"Name":  "test",
 		"Data":  rDate,
 	}
-	pInfos, fOk, sError := ParamsToStruct(arParams, arValues)
+	pInfos, fOk, sError := meth_exec.ParamsToStruct(arParams, arValues)
 
 	if !fOk {
 		t.Fatalf("Ошибка при формировании структуры из списка значений %s", sError)
@@ -57,7 +58,7 @@ func TestParamsToStruct(t *testing.T) {
 /**Проверка преобразования структуры в список параметров со значениями**/
 func TestStructToParams(t *testing.T) {
 	pReq := TestReq{10, "test", time.Date(2000, 01, 01, 10, 10, 10, 0, time.Local)}
-	pMap, fOk, sError := StructToParams(pReq)
+	pMap, fOk, sError := meth_exec.StructToParams(pReq)
 	if !fOk {
 		t.Fatalf("Ошибка при формировании списка значений из структуры %s", sError)
 	}
