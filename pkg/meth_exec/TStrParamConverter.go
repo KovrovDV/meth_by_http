@@ -53,6 +53,9 @@ func (pConv TStrParamConverter) ConvertIn(_pExternal interface{}, _pType reflect
 	}
 	sValue := _pExternal.(string)
 	pElem := reflect.New(_pType).Elem().Interface()
+	if _pType.Kind() == reflect.Ptr {
+		return nil, false, "Параметр не может быть передан по ссылке"
+	}
 
 	switch pElem.(type) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
@@ -115,10 +118,12 @@ func (pConv TStrParamConverter) ConvertIn(_pExternal interface{}, _pType reflect
 		}
 		return nil, false, fmt.Sprintf("Число не попадает в органичение конвертации числа %s - %s", sValue, err)
 	// TODO проверить преобразование из rune[]
-	case string, []rune:
-		return _pInternal.(string), true, ""
+	case string:
+		return sValue, true, ""
+	case []rune:
+		return []rune(sValue), true, ""
 	case time.Time:
-		pRes, err := time.Parse(sValue, pConv.DateFormat)
+		pRes, err := time.Parse(pConv.DateFormat, sValue)
 		if err != nil {
 			return nil, false, fmt.Sprintf("Ошибка преобразования даты %s - %s", sValue, err)
 		}
