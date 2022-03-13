@@ -71,7 +71,7 @@ func (pRouter *THttpRouter) getProc(_sUrl string) (_pCover *meth_exec.TProcCover
 }
 
 /**обработка запроса **/
-func (pRouter *THttpRouter) ProcRequest(w http.ResponseWriter, r *http.Request) {
+func (pRouter *THttpRouter) procRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Пустой вход
 	if len(r.URL.Path) == 0 {
@@ -149,7 +149,7 @@ func (pRouter *THttpRouter) ListenLocal(_sSubPath string) (_fOk bool, _sError st
 	}
 	// Инициализиреу сервер (+ TODO добаить hanler для ssl, авторизации)
 	pRouter.pMux = http.NewServeMux()
-	pRouter.pMux.HandleFunc(_sSubPath, pRouter.ProcRequest)
+	pRouter.pMux.HandleFunc(_sSubPath, pRouter.procRequest)
 	return true, ""
 }
 
