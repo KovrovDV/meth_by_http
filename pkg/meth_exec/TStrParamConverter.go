@@ -9,13 +9,24 @@ import (
 	"time"
 )
 
+const (
+	// ============ строки ошибок ===========================
+	S_OUT_TYPE_ONLY_STR_ERR   = "конвертер поддерживает только строки во внешнем формате"
+	S_NO_PTR_IN_PARAMS        = "Параметр не может быть передан по ссылке"
+	S_NUMBER_COVERT_ERR       = "Ошибка конвертации числа %s - %s"
+	S_OUT_OF_RANGE_NUMBER_ERR = "Число не попадает в органичение конвертации числа %s - %s"
+	S_NUMBER_FP_COVERT_ERR    = "Ошибка преобразования числа с пл. точкой %s - %s"
+	S_DATETIME_CONVERT_ERR    = "Ошибка преобразования даты %s - %s"
+	S_BYTEA_CONVERT_ERR       = "Ошибка преобразования массива байт base64 %s - %s"
+)
+
 type TStrParamConverter struct {
 	DateFormat string
 }
 
 func NewStrParamConverter() *TStrParamConverter {
 	return &TStrParamConverter{
-		DateFormat: "2006-01-02T15:04:05",
+		DateFormat: S_STD_DATE_FORMAT,
 	}
 }
 
@@ -25,7 +36,7 @@ func NewStrParamConverter() *TStrParamConverter {
 func (pConv TStrParamConverter) ConvertOut(_pInternal interface{}, _pType reflect.Type) (_pExternal interface{}, _fOk bool, _sError string) {
 	// Не строка на выходе - выходим
 	if _pType != reflect.TypeOf("") {
-		return nil, false, "конвертер поддерживает только строки во внешнем формате"
+		return nil, false, S_OUT_TYPE_ONLY_STR_ERR
 	}
 	switch _pInternal := _pInternal.(type) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
@@ -49,19 +60,19 @@ func (pConv TStrParamConverter) ConvertOut(_pInternal interface{}, _pType reflec
 func (pConv TStrParamConverter) ConvertIn(_pExternal interface{}, _pType reflect.Type) (_pInternal interface{}, _fOk bool, _sError string) {
 	// Не строка на входе - выходим
 	if reflect.TypeOf(_pExternal) != reflect.TypeOf("") {
-		return nil, false, "конвертер поддерживает только строки во внешнем формате"
+		return nil, false, S_OUT_TYPE_ONLY_STR_ERR
 	}
 	sValue := _pExternal.(string)
 	pElem := reflect.New(_pType).Elem().Interface()
 	if _pType.Kind() == reflect.Ptr {
-		return nil, false, "Параметр не может быть передан по ссылке"
+		return nil, false, S_NO_PTR_IN_PARAMS
 	}
 
 	switch pElem.(type) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		iVal, err := strconv.Atoi(sValue)
 		if err != nil {
-			return nil, false, fmt.Sprintf("Ошибка конвертации числа %s - %s", sValue, err)
+			return nil, false, fmt.Sprintf(S_NUMBER_COVERT_ERR, sValue, err)
 		}
 		// TODO переделать на массив/map с ограничениями
 		switch pElem.(type) {
@@ -102,11 +113,11 @@ func (pConv TStrParamConverter) ConvertIn(_pExternal interface{}, _pType reflect
 				return uint64(iVal), true, ""
 			}
 		}
-		return nil, false, fmt.Sprintf("Число не попадает в органичение конвертации числа %s - %s", sValue, err)
+		return nil, false, fmt.Sprintf(S_OUT_OF_RANGE_NUMBER_ERR, sValue, err)
 	case float32, float64:
 		pRes, err := strconv.ParseFloat(sValue, 64)
 		if err != nil {
-			return nil, false, fmt.Sprintf("Ошибка преобразования числа с пл. точкой %s - %s", sValue, err)
+			return nil, false, fmt.Sprintf(S_NUMBER_FP_COVERT_ERR, sValue, err)
 		}
 		switch pElem.(type) {
 		case float64:
@@ -116,7 +127,7 @@ func (pConv TStrParamConverter) ConvertIn(_pExternal interface{}, _pType reflect
 				return float32(pRes), true, ""
 			}
 		}
-		return nil, false, fmt.Sprintf("Число не попадает в органичение конвертации числа %s - %s", sValue, err)
+		return nil, false, fmt.Sprintf(S_OUT_OF_RANGE_NUMBER_ERR, sValue, err)
 	// TODO проверить преобразование из rune[]
 	case string:
 		return sValue, true, ""
@@ -125,16 +136,21 @@ func (pConv TStrParamConverter) ConvertIn(_pExternal interface{}, _pType reflect
 	case time.Time:
 		pRes, err := time.Parse(pConv.DateFormat, sValue)
 		if err != nil {
-			return nil, false, fmt.Sprintf("Ошибка преобразования даты %s - %s", sValue, err)
+			return nil, false, fmt.Sprintf(S_DATETIME_CONVERT_ERR, sValue, err)
 		}
 		return pRes, true, ""
 	case []byte:
 		pRes, err := base64.StdEncoding.DecodeString(sValue)
 		if err != nil {
-			return nil, false, fmt.Sprintf("Ошибка преобразования массива байт base64 %s - %s", sValue, err)
+			return nil, false, fmt.Sprintf(S_BYTEA_CONVERT_ERR, sValue, err)
 		}
 		return pRes, true, ""
 	default:
 		return fmt.Sprint(_pInternal), true, ""
 	}
+}
+
+/* преоразование внутреннего  типа во внешний*/
+func (pConv TStrParamConverter) InTypeToOut(_pInternal reflect.Type) reflect.Type {
+	return reflect.TypeOf("")
 }

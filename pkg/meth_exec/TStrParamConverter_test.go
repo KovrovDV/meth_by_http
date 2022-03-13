@@ -67,3 +67,14 @@ func Test_TStrParamConverter_ConvertOut(t *testing.T) {
 	require.Truef(t, fOk, "Ошибка пребразования массива байт %s", sError)
 	require.Truef(t, pRes == "VGhlJA==", "Ошибка пребразования массива байт  %s, a должно быть VGhlJA==", pRes)
 }
+
+/**Проверка выдачи внешнего типа**/
+func Test_TStrParamConverter_InTypeToOut(t *testing.T) {
+	pConv := meth_exec.NewStrParamConverter()
+	pStrType := reflect.TypeOf("")
+	require.True(t, pConv.InTypeToOut(reflect.TypeOf((*time.Time)(nil)).Elem()) == pStrType, "Ошибка опредления выходного типа даты")
+	require.True(t, pConv.InTypeToOut(reflect.TypeOf((*int)(nil)).Elem()) == pStrType, "Ошибка опредления выходного типа числа")
+	require.True(t, pConv.InTypeToOut(pStrType) == pStrType, "Ошибка опредления выходного типа строки")
+	require.True(t, pConv.InTypeToOut(reflect.TypeOf((*[]byte)(nil)).Elem()) == pStrType, "Ошибка опредления выходного типа массива")
+	require.True(t, pConv.InTypeToOut(reflect.TypeOf((*float32)(nil)).Elem()) == pStrType, "Ошибка опредления выходного типа числа с пл. точкой")
+}

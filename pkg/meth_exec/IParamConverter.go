@@ -11,4 +11,7 @@ type IParamConverter interface {
 	   		in значение внутри метода, тип для выдачи наружу
 		**/
 	ConvertIn(_pInternal interface{}, _pType reflect.Type) (_pExternal interface{}, _fOk bool, _sError string)
+	/** Представление внутреннего типа во внешний
+	**/
+	InTypeToOut(_pInternal reflect.Type) reflect.Type
 }

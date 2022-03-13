@@ -1,35 +1,43 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"meth_by_http/cmd/apiserver/test_proc"
-	"meth_by_http/pkg/meth_exec"
+	"meth_by_http/pkg/meth_api"
+	"os"
 )
 
 func main() {
 
-	pSrv := meth_exec.NewProcCoverSmp(new(test_proc.TestHandler))
+	pSrv := meth_api.NewHttpRouter()
+	fOk, sErr := pSrv.AddRoute("test", new(test_proc.TestHandler))
+	if !fOk {
+		fmt.Printf("Ошибка запуска %s\r\n", sErr)
+		os.Exit(-1)
+	}
+	// Получаем адрес
+	sAddress := flag.String("address", "localhost:8080", "Адрес сервера host:port")
+	fOk, sErr = pSrv.Listen(*sAddress, "/")
+	if !fOk {
+		fmt.Printf("Ошибка запуска %s\r\n", sErr)
+		os.Exit(-1)
+	}
+	// Завершение
+	defer func() {
+		pSrv.UserStop <- true
+	}()
+	// Ждем получение  строки - и после него останавливаем сервер
+	var input string
+	fmt.Scanln(&input)
 
-	pSrv.Init()
-	/*	fmt.Printf("Список методов %d", len(pSrv.arMethods))
-		fmt.Println()
-
-	*/
-	//fmt.Println(pSrv.arMethods[0].sName)
-
-	/*	for _, pMethInfo := range pSrv.arMethods {
-			fmt.Println(pMethInfo.sName)
-		}
-	*/
-	fmt.Println(" Exec GetName")
-	//	fmt.Println(pSrv.Exec("GetName", struct{ Index int }{1}))
-
-	//	fmt.Println(pSrv.ExecOut("GetName", map[string]interface{}{"Index": "1"}))
-	fmt.Println(pSrv.ExecOut("GetNameWOPtr", map[string]interface{}{"Index": "1"}))
-
+	// Вызов прямой
 	/*
-		http.HandleFunc("/", pSrv.ProcRequest)
-		http.ListenAndServe(":8080", nil)
+		pSrv := meth_exec.NewProcCoverSmp(new(test_proc.TestHandler))
+		pSrv.Init()
+		fmt.Println(pSrv.Exec("GetName", struct{ Index int }{1}))
+		fmt.Println(pSrv.ExecOut("GetName", map[string]interface{}{"Index": "1"}))
+		fmt.Println(pSrv.ExecOut("GetNameWOPtr", map[string]interface{}{"Index": "1"}))
 	*/
 
 }

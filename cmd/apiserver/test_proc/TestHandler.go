@@ -11,13 +11,15 @@ func (pProc *TestHandler) GetName(_pReq struct{ Index int }) {
 
 func (pProc TestHandler) GetNameWOPtr(_pReq struct {
 	Index int
-	Name  *string
+	Name  string
 }) (Resp struct {
 	Ok    bool
 	Error string
+	Info  string
 }) {
 	return struct {
 		Ok    bool
 		Error string
-	}{true, ""}
+		Info  string
+	}{true, "", "Метод вызван"}
 }

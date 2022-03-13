@@ -5,6 +5,12 @@ import (
 	"reflect"
 )
 
+const (
+	// ============================== Строки ошибок ==================================================
+	S_PARAM_TO_STRUCT_ERR = "Ошибка преобразования параметров в структуру %s"
+	S_STRUCT_TO_PARAM_ERR = "Ошибка преобразования структуры в параметры %s"
+)
+
 /***
      Преобразование типа структуры в описание параметров
 **/
@@ -28,7 +34,7 @@ func ParamsToStruct(_pInfo []TParamInfo, _pValues map[string]interface{}) (_pRes
 		if r := recover(); r != nil {
 			_pRes = nil
 			_fOk = false
-			_sError = fmt.Sprintf("Ошибка преобразование параметров в структуру  %s ", r)
+			_sError = fmt.Sprintf(S_PARAM_TO_STRUCT_ERR, r)
 		}
 	}()
 	// Формируем саму струкутуру
@@ -52,7 +58,7 @@ func StructToParams(_pParams interface{}) (_pRes map[string]interface{}, _fOk bo
 		if r := recover(); r != nil {
 			_pRes = nil
 			_fOk = false
-			_sError = fmt.Sprintf("Ошибка преобразование параметров в структуру  %s ", r)
+			_sError = fmt.Sprintf(S_STRUCT_TO_PARAM_ERR, r)
 		}
 	}()
 
