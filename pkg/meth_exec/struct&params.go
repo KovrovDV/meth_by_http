@@ -11,9 +11,7 @@ const (
 	S_STRUCT_TO_PARAM_ERR = "Ошибка преобразования структуры в параметры %s"
 )
 
-/***
-     Преобразование типа структуры в описание параметров
-**/
+/* Преобразование типа структуры в описание параметров */
 func StructToParamInfo(_pType reflect.Type) (_pInfo []TParamInfo) {
 	_pInfo = make([]TParamInfo, _pType.NumField())
 	for i := 0; i < _pType.NumField(); i++ {
@@ -24,11 +22,8 @@ func StructToParamInfo(_pType reflect.Type) (_pInfo []TParamInfo) {
 	return _pInfo
 }
 
-/***
-     Преобразование параметров в структуру
-**/
+/*Преобразование параметров в структуру*/
 func ParamsToStruct(_pInfo []TParamInfo, _pValues map[string]interface{}) (_pRes interface{}, _fOk bool, _sError string) {
-
 	// Обработка паники внутри метода - чтобы сервер не упал из-за ошибки внутри обработки
 	defer func() {
 		if r := recover(); r != nil {
@@ -49,9 +44,7 @@ func ParamsToStruct(_pInfo []TParamInfo, _pValues map[string]interface{}) (_pRes
 	return pVal.Interface(), true, ""
 }
 
-/***
-     Преобразование структуры с данными в набор параметров
-**/
+/*Преобразование структуры с данными в набор параметров*/
 func StructToParams(_pParams interface{}) (_pRes map[string]interface{}, _fOk bool, _sError string) {
 	// Обработка паники внутри метода - чтобы сервер не упал из-за ошибки внутри обработки
 	defer func() {
@@ -61,7 +54,6 @@ func StructToParams(_pParams interface{}) (_pRes map[string]interface{}, _fOk bo
 			_sError = fmt.Sprintf(S_STRUCT_TO_PARAM_ERR, r)
 		}
 	}()
-
 	if _pParams != nil {
 		pVal := reflect.ValueOf(_pParams)
 		pType := reflect.TypeOf(_pParams)

@@ -132,7 +132,6 @@ func (pCover *TProcCover) ExecOut(_sMethName string, _pParams map[string]interfa
 	// Ищем нужный метод и запускаем
 	for _, pMethInfo := range pCover.arMethods {
 		// Case sensitive или ограничиваем в Init
-
 		if pMethInfo.sName == _sMethName {
 			// Формирум список параметров
 			pParams := make(map[string]interface{})
@@ -159,6 +158,9 @@ func (pCover *TProcCover) ExecOut(_sMethName string, _pParams map[string]interfa
 			}
 			// Преобразуем ответ в список параметров
 			pInternalOutParams, fOk, sError := StructToParams(pOut)
+			if !fOk {
+				return nil, fOk, sError
+			}
 			// Преобразуем для выдачи наружу
 			pOutParams := make(map[string]interface{})
 			for _, pParamInfo := range pMethInfo.arOutput {
