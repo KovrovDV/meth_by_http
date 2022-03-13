@@ -9,14 +9,14 @@ import (
 )
 
 func main() {
-
+	// Формируем привязку методов test_proc.TestHandler с путем http
 	pSrv := meth_api.NewHttpRouter()
 	fOk, sErr := pSrv.AddRoute("test", new(test_proc.TestHandler))
 	if !fOk {
 		fmt.Printf("Ошибка запуска %s\r\n", sErr)
 		os.Exit(-1)
 	}
-	// Получаем адрес
+	// Получаем адрес из параметров и запускаем сервер
 	sAddress := flag.String("address", "localhost:8080", "Адрес сервера host:port")
 	fOk, sErr = pSrv.Listen(*sAddress, "/")
 	if !fOk {
@@ -31,7 +31,7 @@ func main() {
 	var input string
 	fmt.Scanln(&input)
 
-	// Вызов прямой
+	// Прямой вызов методов объекта
 	/*
 		pSrv := meth_exec.NewProcCoverSmp(new(test_proc.TestHandler))
 		pSrv.Init()
